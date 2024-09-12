@@ -9,41 +9,18 @@ Cons:
     Flatpak/Snap Installation: Replicating packages across systems may require flatpak or snap to be installed manually before applying the configuration.
     Snap/Flatpak Versions: Managing version locking for these formats is not as straightforward as for apt and .deb packages.
 
-Changes:
-
-    Detection Functions:
-        detect_apt_packages: Detects all installed apt and dpkg packages, including their versions.
-        detect_flatpak_packages: Detects all installed Flatpak apps.
-        detect_snap_packages: Detects all installed Snap apps, including versions.
-
-    Dynamic Config Update:
-        The script dynamically updates the configuration file (system-declaration.cfg) to include:
-            apt/dpkg packages with versions.
-            Removed packages.
-            Installed flatpaks.
-            Installed snaps with versions.
-
-    Install Flatpaks & Snaps:
-        The script installs packages from Flatpak and Snap in addition to apt packages.
-
-
-Key Enhancements:
-
-    Version Locking:
-        The packages_install array now includes specific versions for each package, ensuring version consistency across systems.
-
     Backup & Rollback:
         The script creates a snapshot of the system before applying changes, storing it in a time-stamped directory defined by backup_dir.
         The rollback_system_state function allows rolling back to any saved state by passing the backup directory as an argument.
 
     Example:
 
-    bash
+bash
 
-    sudo bash apply-declarative-system.sh rollback /path/to/backup/YYYY-MM-DD_HH-MM-SS
+sudo bash apply-declarative-system.sh rollback /path/to/backup/YYYY-MM-DD_HH-MM-SS
 
-    Dynamic Configuration File Updates:
-        The script automatically reads the currently installed and removed packages, updates the configuration file (system-declaration.cfg), and locks package versions based on the current system state.
+    **Dynamic Configuration File Updates:
+       **NOT -AVILABLE - The script automatically reads the currently installed and removed packages, updates the configuration file (system-declaration.cfg), and locks package versions based on the current system state.
 
     File Management:
         Files in the files_sync section are backed up and can be restored during rollback.
@@ -61,8 +38,6 @@ Rollback: To roll back the system to a previous state:
 bash
 
     sudo bash apply-declarative-system.sh rollback /path/to/backup/YYYY-MM-DD_HH-MM-SS
-
-This enhanced script should cover most of the declarative, reproducible features found in tools like Nix and Ansible for Debian-based systems.
 
 
 Key Additions:
