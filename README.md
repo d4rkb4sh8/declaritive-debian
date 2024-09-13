@@ -15,30 +15,14 @@ Cons:
 
     Example:
 
-bash
-
-sudo bash apply-declarative-system.sh rollback /path/to/backup/YYYY-MM-DD_HH-MM-SS
-
-    **Dynamic Configuration File Updates:
-       **NOT -AVILABLE - The script automatically reads the currently installed and removed packages, updates the configuration file (system-declaration.cfg), and locks package versions based on the current system state.
-
-    File Management:
-        Files in the files_sync section are backed up and can be restored during rollback.
 
 How to Use:
 
-    Apply Configuration: Run the script to apply system configuration:
+    Apply Configuration: Move config to $HOME folder Run the script to apply system configuration:
 
     bash
 
 sudo bash apply-declarative-system.sh
-
-Rollback: To roll back the system to a previous state:
-
-bash
-
-    sudo bash apply-declarative-system.sh rollback /path/to/backup/YYYY-MM-DD_HH-MM-SS
-
 
 Key Additions:
 
@@ -54,12 +38,3 @@ Key Additions:
     Backups:
         Each time the script is run, it creates a timestamped backup of the system-declaration.cfg file in the $HOME/backup directory.
 
-Backup Directory:
-
-    The backup folder is automatically created under the user's home directory ($HOME/backup).
-    Backups of the configuration file are saved with timestamps, ensuring that you can restore a previous system state if necessary.
-
-How to Use:
-
-    First Run:
-        On the first run, the script will initialize the system-declaration.cfg and take a snapshot of the current system state.
