@@ -202,5 +202,4 @@ main() {
 }
 
 # Entry point
-main "$@"
-
+main "$@" && notify-send -e "success" || notify-send -e "failed"
