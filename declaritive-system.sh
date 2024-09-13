@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration
-BACKUP_DIR="/home/h4ck3r/backup"
+BACKUP_DIR="$HOME/backup"
 declare -A PACKAGE_MANAGERS # Associative array to store package managers
 PACKAGE_MANAGERS=( ["dpkg"]="dpkg -l" ["apt"]="apt list --installed" ["brew"]="brew list" ["flatpak"]="flatpak list" ["snap"]="snap list")
 CONFIG_FILES=(".bashrc" ".bash_aliases") # List of config files to backup
