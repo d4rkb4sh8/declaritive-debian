@@ -22,6 +22,27 @@ backup_system_state() {
     echo "Backup saved at $BACKUP_DIR/system-declaration_$TIMESTAMP.cfg"
 }
 
+
+# Create a timestamp for backup filenames
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+
+# Backup .bashrc
+if [ -f "$HOME/.bashrc" ]; then
+    cp "$HOME/.bashrc" "$BACKUP_DIR/.bashrc_$TIMESTAMP"
+    echo "Backed up .bashrc to $BACKUP_DIR/.bashrc_$TIMESTAMP"
+else
+    echo ".bashrc does not exist, no backup created."
+fi
+
+# Backup .bash_aliases
+if [ -f "$HOME/.bash_aliases" ]; then
+    cp "$HOME/.bash_aliases" "$BACKUP_DIR/.bash_aliases_$TIMESTAMP"
+    echo "Backed up .bash_aliases to $BACKUP_DIR/.bash_aliases_$TIMESTAMP"
+else
+    echo ".bash_aliases does not exist, no backup created."
+fi
+
+
 # Initialize config file if it doesn't exist
 initialize_config_file() {
     if [ ! -f "$CONFIG_FILE" ]; then
