@@ -18,7 +18,7 @@ backup_system_state() {
     echo "Backup saved at $BACKUP_DIR/system-declaration_$TIMESTAMP.cfg"
 }
 
-# Backup .bashrc
+# Backup a file
 backup_file() {
     local file="$1"
     local backup_name="$2"
@@ -38,12 +38,6 @@ initialize_config_file() {
 
 # Installed apt/dpkg packages
 packages_install=()
-
-# Installed flatpaks
-flatpak_install=()
-
-# Installed snaps
-snap_install=()
 
 # Installed Homebrew formulas
 homebrew_formulas=()
@@ -70,20 +64,6 @@ detect_packages() {
     # Detect apt-installed and dpkg packages
     installed_apt_packages=$(dpkg-query -W -f='${binary:Package}=${Version}\n')
 
-    # Detect installed flatpaks
-    if command -v flatpak &> /dev/null; then
-        installed_flatpaks=$(flatpak list --app --columns=application)
-    else
-        installed_flatpaks=""
-    fi
-
-    # Detect installed snaps
-    if command -v snap &> /dev/null; then
-        installed_snaps=$(snap list | awk 'NR>1 {print $1"="$2}')
-    else
-        installed_snaps=""
-    fi
-
     # Detect installed Homebrew formulas
     if command -v brew &> /dev/null; then
         installed_brew_formulas=$(brew list)
@@ -94,27 +74,13 @@ detect_packages() {
 
 # Update the config file with detected packages
 update_config_file_with_packages() {
-    # Replace packages_install, flatpak_install, snap_install, and homebrew_formulas
+    # Replace packages_install and homebrew_formulas
     sed -i -e '/^packages_install=(/,+1d' \
-           -e '/^flatpak_install=(/,+1d' \
-           -e '/^snap_install=(/,+1d' \
            -e '/^homebrew_formulas=(/,+1d' "$CONFIG_FILE"
     
     {
         echo "packages_install=("
         echo "$installed_apt_packages" | while IFS== read -r pkg ver; do
-            echo "    \"$pkg=$ver\""
-        done
-        echo ")"
-
-        echo "flatpak_install=("
-        echo "$installed_flatpaks" | while read -r pkg; do
-            echo "    \"$pkg\""
-        done
-        echo ")"
-
-        echo "snap_install=("
-        echo "$installed_snaps" | while IFS== read -r pkg ver; do
             echo "    \"$pkg=$ver\""
         done
         echo ")"
@@ -142,20 +108,39 @@ install_packages() {
         fi
     done
 
-    # Install flatpak packages
-    for package in "${flatpak_install[@]}"; do
-        flatpak install -y "$package"
-    done
-
-    # Install snap packages
-    for package in "${snap_install[@]}"; do
-        snap install "$package"
-    done
-
     # Install Homebrew formulas
     for formula in "${homebrew_formulas[@]}"; do
         brew install "$formula"
     done
+}
+
+# Remove entries from the config file if a package is removed
+remove_config_entries() {
+    # Remove apt/dpkg packages
+    for package in "${packages_install[@]}"; do
+        pkg_name=$(echo "$package" | cut -d '=' -f 1)
+        if ! is_package_installed "$pkg_name"; then
+            sed -i "/$pkg_name/d" "$CONFIG_FILE"
+        fi
+    done
+
+    # Remove Homebrew formulas
+    for formula in "${homebrew_formulas[@]}"; do
+        if ! brew list | grep -qw "$formula"; then
+            sed -i "/$formula/d" "$CONFIG_FILE"
+        fi
+    done
+}
+
+# Build a new system from an existing config file
+build_new_system() {
+    if [ -f "$CONFIG_FILE" ]; then
+        source "$CONFIG_FILE"
+        install_packages
+        echo "New system built successfully from existing configuration file!"
+    else
+        echo "Configuration file does not exist. Please create one first."
+    fi
 }
 
 # Main function
@@ -169,8 +154,13 @@ main() {
     backup_file "$HOME/.bashrc" ".bashrc"
     backup_file "$HOME/.bash_aliases" ".bash_aliases"
     install_packages
+    remove_config_entries
     echo "System configuration applied successfully!"
 }
 
 # Entry point
-main "$@"
+if [ "$1" == "--build" ]; then
+    build_new_system
+else
+    main "$@"
+fi
