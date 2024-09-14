@@ -1,46 +1,76 @@
 #!/bin/bash
 
-# Configuration
-BACKUP_DIR="$HOME/backup"
-declare -A PACKAGE_MANAGERS # Associative array to store package managers
-PACKAGE_MANAGERS=( ["dpkg"]="dpkg -l" ["apt"]="apt list --installed" ["brew"]="brew list" ["flatpak"]="flatpak list" ["snap"]="snap list")
-CONFIG_FILES=(".bashrc" ".bash_aliases") # List of config files to backup
+# Define paths and backup directory
+CONFIG_FILE="$HOME/config_packages.txt"
+BACKUP_DIR="$HOME/backups"
+CURRENT_TIME=$(date +"%Y%m%d_%H%M%S")
 
-# Ensure BACKUP_DIR exists
+# Create backup directory if it doesn't exist
 mkdir -p $BACKUP_DIR
 
-# Function to create a timestamped backup
-function create_backup {
-    local file=$1
-    cp $file "$BACKUP_DIR/${file}_$(date +%F_%H-%M-%S)"
+# Function to get packages from dpkg and apt
+get_dpkg_apt_packages() {
+    echo "Getting dpkg and apt packages..."
+    sudo dpkg-query -l > /tmp/dpkg_list.txt
+    sudo apt list --installed > /tmp/apt_list.txt
+    cat /tmp/dpkg_list.txt /tmp/apt_list.txt | awk '/^ii/ {print $2}' > /tmp/all_packages.txt
 }
 
-# Main function to manage backups and config files
-function manage_configs {
-    for manager in "${!PACKAGE_MANAGERS[@]}"; do
-        echo "Checking installed packages with $manager..."
-        # Get list of installed packages from each package manager
-        pkgs=$(${PACKAGE_MANAGERS[$manager]})
-        
-        while read -r pkg; do
-            if [[ -z $(grep "^$pkg" "$BACKUP_DIR/${file}_backup.log") ]]; then
-                echo "Package $pkg detected."
-                create_backup $file
-            fi
-        done <<< "$(echo "$pkgs" | grep -E '^(ii|i)'"\t")" # Filter lines that match installed packages
-    done
+# Function to get packages from flatpak
+get_flatpak_packages() {
+    echo "Getting flatpak packages..."
+    flatpak list --installed > /tmp/flatpak_list.txt
+    awk '{print $1}' /tmp/flatpak_list.txt > /tmp/all_packages.txt
 }
 
-# Function to clean up old backups
-function cleanup_backups {
-    local count=$(ls -1 $BACKUP_DIR/*.log 2>/dev/null | wc -l)
-    if [[ $count -gt 5 ]]; then
-        ls -tr $BACKUP_DIR/*.log | head -n $(($count-5)) | xargs rm -f
+# Function to get packages from snap
+get_snap_packages() {
+    echo "Getting snap packages..."
+    snap list > /tmp/snap_list.txt
+    awk '{print $1}' /tmp/snap_list.txt >> /tmp/all_packages.txt
+}
+
+# Function to get packages from homebrew
+get_homebrew_packages() {
+    echo "Getting homebrew packages..."
+    brew list > /tmp/homebrew_list.txt
+    cat /tmp/homebrew_list.txt >> /tmp/all_packages.txt
+}
+
+# Main function to update the config file and handle backups
+update_config_file() {
+    echo "Updating configuration file..."
+    get_dpkg_apt_packages
+    get_flatpak_packages
+    get_snap_packages
+    get_homebrew_packages
+
+    sort -u /tmp/all_packages.txt > $CONFIG_FILE
+    rm /tmp/all_packages.txt
+
+    # Create a backup of the previous config file
+    cp $CONFIG_FILE ${BACKUP_DIR}/config_packages_${CURRENT_TIME}.bak
+}
+
+# Check if the config file exists and is not empty, otherwise create it
+if [ ! -s "$CONFIG_FILE" ]; then
+    echo "Config file does not exist or is empty. Initializing..."
+    update_config_file
+else
+    # Compare current packages with the config file to detect changes
+    get_dpkg_apt_packages
+    get_flatpak_packages
+    get_snap_packages
+    get_homebrew_packages
+
+    sort -u /tmp/all_packages.txt > /tmp/current_packages.txt
+    rm /tmp/all_packages.txt
+
+    if diff /tmp/current_packages.txt $CONFIG_FILE > /dev/null; then
+        echo "No changes detected."
+    else
+        update_config_file
     fi
-}
+fi
 
-# Main script execution
-for file in "${CONFIG_FILES[@]}"; do
-    manage_configs $file
-done
-cleanup_backups
+echo "Configuration file updated and backed up successfully."
