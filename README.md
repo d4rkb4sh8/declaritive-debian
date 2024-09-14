@@ -1,19 +1,12 @@
-Pros:
+Key Changes:
 
-    Comprehensive System Capture: All installed software, regardless of installation method, is tracked and added to the configuration file.
-    Reproducibility: Every package, including flatpaks and snaps, can be installed on another machine to replicate the system environment.
-    Cross-Package Format Management: Supports different types of packaging systems used on Debian, making the solution more flexible.
+    remove_config_entries Function: This function checks if a package is no longer installed and removes its entry from the system-declaration.cfg file.
 
-Cons:
+    build_new_system Function: This function allows building a new system from an existing configuration file. It is triggered by the --build flag.
 
-    Flatpak/Snap Installation: Replicating packages across systems may require flatpak or snap to be installed manually before applying the configuration.
-    Snap/Flatpak Versions: Managing version locking for these formats is not as straightforward as for apt and .deb packages.
+    Entry Point: The script now checks for the --build flag to determine whether to build a new system or run the main function.
 
-    Backup & Rollback:
-        The script creates a snapshot of the system before applying changes, storing it in a time-stamped directory defined by backup_dir.
-        The rollback_system_state function allows rolling back to any saved state by passing the backup directory as an argument.
-
-    Example:
+This version ensures that the system-declaration.cfg file always accurately reflects the current state of the system, and it provides a way to build a new system from an existing configuration file.
 
 
 How to Use:
@@ -22,7 +15,7 @@ How to Use:
 
     bash
 
-sudo bash apply-declarative-system.sh
+./apply-declarative-system.sh
 
 Key Additions:
 
