@@ -15,7 +15,7 @@ How to Use:
 
     bash
 
-./apply-declarative-system.sh
+./declarative-system.sh
 
 Key Additions:
 
