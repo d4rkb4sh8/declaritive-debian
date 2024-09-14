@@ -1,76 +1,176 @@
 #!/bin/bash
 
-# Define paths and backup directory
-CONFIG_FILE="$HOME/config_packages.txt"
-BACKUP_DIR="$HOME/backups"
-CURRENT_TIME=$(date +"%Y%m%d_%H%M%S")
+# Set the backup directory path
+BACKUP_DIR="$HOME/backup"
+
+# Set the config file path
+CONFIG_FILE="system-declaration.cfg"
 
 # Create backup directory if it doesn't exist
-mkdir -p $BACKUP_DIR
-
-# Function to get packages from dpkg and apt
-get_dpkg_apt_packages() {
-    echo "Getting dpkg and apt packages..."
-    sudo dpkg-query -l > /tmp/dpkg_list.txt
-    sudo apt list --installed > /tmp/apt_list.txt
-    cat /tmp/dpkg_list.txt /tmp/apt_list.txt | awk '/^ii/ {print $2}' > /tmp/all_packages.txt
+create_backup_dir() {
+    [ ! -d "$BACKUP_DIR" ] && mkdir -p "$BACKUP_DIR"
 }
 
-# Function to get packages from flatpak
-get_flatpak_packages() {
-    echo "Getting flatpak packages..."
-    flatpak list --installed > /tmp/flatpak_list.txt
-    awk '{print $1}' /tmp/flatpak_list.txt > /tmp/all_packages.txt
+# Backup current config
+backup_system_state() {
+    TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+    cp "$CONFIG_FILE" "$BACKUP_DIR/system-declaration_$TIMESTAMP.cfg"
+    echo "Backup saved at $BACKUP_DIR/system-declaration_$TIMESTAMP.cfg"
 }
 
-# Function to get packages from snap
-get_snap_packages() {
-    echo "Getting snap packages..."
-    snap list > /tmp/snap_list.txt
-    awk '{print $1}' /tmp/snap_list.txt >> /tmp/all_packages.txt
-}
-
-# Function to get packages from homebrew
-get_homebrew_packages() {
-    echo "Getting homebrew packages..."
-    brew list > /tmp/homebrew_list.txt
-    cat /tmp/homebrew_list.txt >> /tmp/all_packages.txt
-}
-
-# Main function to update the config file and handle backups
-update_config_file() {
-    echo "Updating configuration file..."
-    get_dpkg_apt_packages
-    get_flatpak_packages
-    get_snap_packages
-    get_homebrew_packages
-
-    sort -u /tmp/all_packages.txt > $CONFIG_FILE
-    rm /tmp/all_packages.txt
-
-    # Create a backup of the previous config file
-    cp $CONFIG_FILE ${BACKUP_DIR}/config_packages_${CURRENT_TIME}.bak
-}
-
-# Check if the config file exists and is not empty, otherwise create it
-if [ ! -s "$CONFIG_FILE" ]; then
-    echo "Config file does not exist or is empty. Initializing..."
-    update_config_file
-else
-    # Compare current packages with the config file to detect changes
-    get_dpkg_apt_packages
-    get_flatpak_packages
-    get_snap_packages
-    get_homebrew_packages
-
-    sort -u /tmp/all_packages.txt > /tmp/current_packages.txt
-    rm /tmp/all_packages.txt
-
-    if diff /tmp/current_packages.txt $CONFIG_FILE > /dev/null; then
-        echo "No changes detected."
+# Backup .bashrc
+backup_file() {
+    local file="$1"
+    local backup_name="$2"
+    if [ -f "$file" ]; then
+        cp "$file" "$BACKUP_DIR/$backup_name_$TIMESTAMP"
+        echo "Backed up $file to $BACKUP_DIR/$backup_name_$TIMESTAMP"
     else
-        update_config_file
+        echo "$file does not exist, no backup created."
     fi
-fi
+}
 
-echo "Configuration file updated and backed up successfully."
+# Initialize config file if it doesn't exist
+initialize_config_file() {
+    if [ ! -f "$CONFIG_FILE" ]; then
+        cat <<EOF > "$CONFIG_FILE"
+# System Declaration Config
+
+# Installed apt/dpkg packages
+packages_install=()
+
+# Installed flatpaks
+flatpak_install=()
+
+# Installed snaps
+snap_install=()
+
+# Installed Homebrew formulas
+homebrew_formulas=()
+
+# Services, custom commands, etc.
+EOF
+        echo "Configuration file created."
+    fi
+}
+
+# Load the config file
+load_config_file() {
+    # Check if config file exists before sourcing
+    [ -f "$CONFIG_FILE" ] && source "$CONFIG_FILE"
+}
+
+# Helper function to check if a package is installed (for apt and dpkg)
+is_package_installed() {
+    dpkg -l | grep -qw "$1"
+}
+
+# Detect installed packages
+detect_packages() {
+    # Detect apt-installed and dpkg packages
+    installed_apt_packages=$(dpkg-query -W -f='${binary:Package}=${Version}\n')
+
+    # Detect installed flatpaks
+    if command -v flatpak &> /dev/null; then
+        installed_flatpaks=$(flatpak list --app --columns=application)
+    else
+        installed_flatpaks=""
+    fi
+
+    # Detect installed snaps
+    if command -v snap &> /dev/null; then
+        installed_snaps=$(snap list | awk 'NR>1 {print $1"="$2}')
+    else
+        installed_snaps=""
+    fi
+
+    # Detect installed Homebrew formulas
+    if command -v brew &> /dev/null; then
+        installed_brew_formulas=$(brew list)
+    else
+        installed_brew_formulas=""
+    fi
+}
+
+# Update the config file with detected packages
+update_config_file_with_packages() {
+    # Replace packages_install, flatpak_install, snap_install, and homebrew_formulas
+    sed -i -e '/^packages_install=(/,+1d' \
+           -e '/^flatpak_install=(/,+1d' \
+           -e '/^snap_install=(/,+1d' \
+           -e '/^homebrew_formulas=(/,+1d' "$CONFIG_FILE"
+    
+    {
+        echo "packages_install=("
+        echo "$installed_apt_packages" | while IFS== read -r pkg ver; do
+            echo "    \"$pkg=$ver\""
+        done
+        echo ")"
+
+        echo "flatpak_install=("
+        echo "$installed_flatpaks" | while read -r pkg; do
+            echo "    \"$pkg\""
+        done
+        echo ")"
+
+        echo "snap_install=("
+        echo "$installed_snaps" | while IFS== read -r pkg ver; do
+            echo "    \"$pkg=$ver\""
+        done
+        echo ")"
+
+        echo "homebrew_formulas=("
+        echo "$installed_brew_formulas" | while read -r formula; do
+            echo "    \"$formula\""
+        done
+        echo ")"
+    } >> "$CONFIG_FILE"
+}
+
+# Install packages from the config
+install_packages() {
+    # Update package lists
+    sudo apt-get update
+
+    # Install apt/dpkg packages
+    for package in "${packages_install[@]}"; do
+        pkg_name=$(echo "$package" | cut -d '=' -f 1)
+        if is_package_installed "$pkg_name"; then
+            echo "$pkg_name is already installed."
+        else
+            sudo apt-get install -y "$pkg_name"
+        fi
+    done
+
+    # Install flatpak packages
+    for package in "${flatpak_install[@]}"; do
+        flatpak install -y "$package"
+    done
+
+    # Install snap packages
+    for package in "${snap_install[@]}"; do
+        snap install "$package"
+    done
+
+    # Install Homebrew formulas
+    for formula in "${homebrew_formulas[@]}"; do
+        brew install "$formula"
+    done
+}
+
+# Main function
+main() {
+    create_backup_dir
+    initialize_config_file
+    load_config_file
+    detect_packages
+    update_config_file_with_packages
+    backup_system_state
+    backup_file "$HOME/.bashrc" ".bashrc"
+    backup_file "$HOME/.bash_aliases" ".bash_aliases"
+    install_packages
+    echo "System configuration applied successfully!"
+}
+
+# Entry point
+main "$@"
