@@ -1,3 +1,6 @@
+Steps:
+    chmod +x system-declaration.sh
+
 Usage:
 
     Save: ./system-declaration.sh --save
