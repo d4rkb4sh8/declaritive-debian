@@ -276,7 +276,7 @@ show_manpage() {
     echo "    Written by [d4rkb4sh8]"
     echo ""
     echo "REPORTING BUGS"
-    echo "    Report bugs to [https://github.com/d4rkb4sh8]"
+    echo "    Report bugs to [https://github.com/d4rkb4sh8/declaritive-debian]"
     echo ""
     echo "COPYRIGHT"
     echo "    Copyright © 2023 [d4rkb4sh8] License [Open Source/GNU/Public License]"
