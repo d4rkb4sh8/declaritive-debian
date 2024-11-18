@@ -37,10 +37,17 @@ Backup nvim configuration.
 .B \-c, \-\-config
 Backup .config folder.
 .TP
+.B \-A, \-\-all
+Backup all packages and configurations.
+.TP
 .B \-h, \-\-help
 Display this help message.
 
 .SH EXAMPLES
+.TP
+.B sudo ./backup_system.sh --all
+Backup all packages and configurations.
+
 .TP
 .B sudo ./backup_system.sh --apt --brew --gnome
 Backup apt packages, homebrew packages, and GNOME configuration.
@@ -53,4 +60,3 @@ Copyright \(co 2023 [Your Name]. License: MIT.
 
 .SH SEE ALSO
 apt(8), brew(1), flatpak(1), snap(1)
-

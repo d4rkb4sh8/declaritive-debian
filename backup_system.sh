@@ -6,8 +6,9 @@ if [ "$EUID" -ne 0 ]; then
   exit
 fi
 
-# Define backup directory
-BACKUP_DIR="$HOME/system_backup_$(date +%Y%m%d_%H%M%S)"
+# Define backup directory in the user's home directory
+USER_HOME=$(eval echo ~${SUDO_USER})
+BACKUP_DIR="$USER_HOME/system_backup_$(date +%Y%m%d_%H%M%S)"
 mkdir -p "$BACKUP_DIR"
 
 # Function to display help message
@@ -22,6 +23,7 @@ display_help() {
   echo "  -t, --terminal   Backup terminal configuration"
   echo "  -n, --nvim       Backup nvim configuration"
   echo "  -c, --config     Backup .config folder"
+  echo "  -A, --all        Backup all packages and configurations"
   echo "  -h, --help       Display this help message"
   exit 0
 }
@@ -64,20 +66,32 @@ backup_gnome_config() {
 # Function to backup terminal configuration
 backup_terminal_config() {
   echo "Backing up terminal configuration..."
-  cp -r "$HOME/.bashrc" "$BACKUP_DIR/"
-  cp -r "$HOME/.zshrc" "$BACKUP_DIR/" 2>/dev/null
+  cp -r "$USER_HOME/.bashrc" "$BACKUP_DIR/"
+  cp -r "$USER_HOME/.zshrc" "$BACKUP_DIR/" 2>/dev/null
 }
 
 # Function to backup nvim configuration
 backup_nvim_config() {
   echo "Backing up nvim configuration..."
-  cp -r "$HOME/.config/nvim" "$BACKUP_DIR/"
+  cp -r "$USER_HOME/.config/nvim" "$BACKUP_DIR/"
 }
 
 # Function to backup .config folder
 backup_config_folder() {
   echo "Backing up .config folder..."
-  cp -r "$HOME/.config" "$BACKUP_DIR/"
+  cp -r "$USER_HOME/.config" "$BACKUP_DIR/"
+}
+
+# Function to run all backup functions
+backup_all() {
+  backup_apt_packages
+  backup_homebrew_packages
+  backup_flatpak_packages
+  backup_snap_packages
+  backup_gnome_config
+  backup_terminal_config
+  backup_nvim_config
+  backup_config_folder
 }
 
 # Main function to parse options and run backup functions
@@ -92,6 +106,7 @@ main() {
       -t|--terminal) backup_terminal_config; shift ;;
       -n|--nvim) backup_nvim_config; shift ;;
       -c|--config) backup_config_folder; shift ;;
+      -A|--all) backup_all; shift ;;
       -h|--help) display_help; shift ;;
       *) echo "Unknown parameter passed: $1"; display_help; shift ;;
     esac
