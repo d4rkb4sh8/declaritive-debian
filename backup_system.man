@@ -1,0 +1,56 @@
+.\" Manpage for backup_system.sh.
+.TH BACKUP_SYSTEM 1 "October 2023" "1.0" "backup_system.sh manual"
+.SH NAME
+backup_system.sh \- Backup system packages and configurations
+
+.SH SYNOPSIS
+.B backup_system.sh
+[\fIoptions\fR]
+
+.SH DESCRIPTION
+.B backup_system.sh
+is a script to backup installed packages and configuration files on a Debian system.
+
+.SH OPTIONS
+.TP
+.B \-a, \-\-apt
+Backup apt packages.
+.TP
+.B \-b, \-\-brew
+Backup homebrew packages.
+.TP
+.B \-f, \-\-flatpak
+Backup flatpak packages.
+.TP
+.B \-s, \-\-snap
+Backup snap packages.
+.TP
+.B \-g, \-\-gnome
+Backup GNOME configuration.
+.TP
+.B \-t, \-\-terminal
+Backup terminal configuration.
+.TP
+.B \-n, \-\-nvim
+Backup nvim configuration.
+.TP
+.B \-c, \-\-config
+Backup .config folder.
+.TP
+.B \-h, \-\-help
+Display this help message.
+
+.SH EXAMPLES
+.TP
+.B sudo ./backup_system.sh --apt --brew --gnome
+Backup apt packages, homebrew packages, and GNOME configuration.
+
+.SH AUTHOR
+Written by [Your Name].
+
+.SH COPYRIGHT
+Copyright \(co 2023 [Your Name]. License: MIT.
+
+.SH SEE ALSO
+apt(8), brew(1), flatpak(1), snap(1)
+
