@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define backup directory in the user's home directory
-BACKUP_DIR="$HOME/system_backup_$(date +%Y%m%d_%H%M%S)"
+BACKUP_DIR="$HOME/system_backup"
 mkdir -p "$BACKUP_DIR"
 
 # Define the configuration file
@@ -70,9 +70,9 @@ backup_gnome_config() {
 backup_terminal_config() {
   echo "Backing up terminal configuration..."
   cp -r "$HOME/.bashrc" "$BACKUP_DIR/"
-  cp -r "$HOME/.zshrc" "$BACKUP_DIR/" 2>/dev/null
+  cp -r "$HOME/.bash_aliases" "$BACKUP_DIR/" 2>/dev/null
   echo "TERMINAL_CONFIG=$BACKUP_DIR/.bashrc" >> "$CFG_FILE"
-  echo "TERMINAL_CONFIG=$BACKUP_DIR/.zshrc" >> "$CFG_FILE"
+  echo "TERMINAL_CONFIG=$BACKUP_DIR/.bash_aliases" >> "$CFG_FILE"
 }
 
 # Function to backup nvim configuration
@@ -150,7 +150,7 @@ restore_system() {
   if [ -n "$TERMINAL_CONFIG" ]; then
     echo "Restoring terminal configuration..."
     cp "$TERMINAL_CONFIG" "$HOME/.bashrc"
-    cp "$TERMINAL_CONFIG" "$HOME/.zshrc" 2>/dev/null
+    cp "$TERMINAL_CONFIG" "$HOME/.bash_aliases" 2>/dev/null
   fi
 
   # Restore nvim configuration
