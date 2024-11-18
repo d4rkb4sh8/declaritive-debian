@@ -1,7 +1,7 @@
 .\" Manpage for backup_system.sh.
 .TH BACKUP_SYSTEM 1 "October 2023" "1.0" "backup_system.sh manual"
 .SH NAME
-backup_system.sh \- Backup system packages and configurations
+backup_system.sh \- Backup and restore system packages and configurations
 
 .SH SYNOPSIS
 .B backup_system.sh
@@ -9,7 +9,7 @@ backup_system.sh \- Backup system packages and configurations
 
 .SH DESCRIPTION
 .B backup_system.sh
-is a script to backup installed packages and configuration files on a Debian system.
+is a script to backup and restore installed packages and configuration files on a Debian system.
 
 .SH OPTIONS
 .TP
@@ -40,17 +40,24 @@ Backup .config folder.
 .B \-A, \-\-all
 Backup all packages and configurations.
 .TP
+.B \-r, \-\-restore
+Restore system based on the .cfg file.
+.TP
 .B \-h, \-\-help
 Display this help message.
 
 .SH EXAMPLES
 .TP
-.B sudo ./backup_system.sh --all
+.B ./backup_system.sh --all
 Backup all packages and configurations.
 
 .TP
-.B sudo ./backup_system.sh --apt --brew --gnome
+.B ./backup_system.sh --apt --brew --gnome
 Backup apt packages, homebrew packages, and GNOME configuration.
+
+.TP
+.B ./backup_system.sh --restore
+Restore system based on the .cfg file.
 
 .SH AUTHOR
 Written by [Your Name].
