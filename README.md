@@ -1,12 +1,14 @@
 **Install: Download and place in $HOME directory**
+--------------------------------------------------
 
-download backup_system.sh
+download backup\_system.sh
 
-chmod +x backup_system.sh
+chmod +x backup\_system.sh
 
-mv backup_system.sh $HOME OR add it to whatever PATH location you like
+mv backup\_system.sh $HOME OR add it to whatever PATH location you like
 
-**Usage: backup_system.sh \[options\]**
+**Usage: backup\_system.sh \[options\]**
+----------------------------------------
 
 Options:
 
@@ -31,4 +33,3 @@ Options:
 \-r, --restore Restore system based on the .cfg file
 
 \-h, --help Display this help message
-
