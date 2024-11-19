@@ -1,5 +1,5 @@
 .\" Manpage for backup_system.sh.
-.TH BACKUP_SYSTEM 1 "October 2023" "1.0" "backup_system.sh manual"
+.TH BACKUP_SYSTEM 1 "November2024" "1.0" "backup_system.sh manual"
 .SH NAME
 backup_system.sh \- Backup and restore system packages and configurations
 
