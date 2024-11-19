@@ -1,4 +1,12 @@
-Usage: backup\_system.sh \[options\]
+**Install: Download and place in $HOME directory**
+
+download backup\_system.sh
+
+chmod +x backup\_system.sh
+
+mv backup\_system.sh $HOME OR add it to whatever PATH location you like
+
+**Usage: backup\_system.sh \[options\]**
 
 Options:
 
