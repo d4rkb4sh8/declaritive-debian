@@ -1,35 +1,65 @@
-**Install: Download and place in $HOME directory**
---------------------------------------------------
+⣾  Loading⣽  Loading⣻  Loading⢿  Loading⡿  Loading⣟  Loading⣯  Loading⣷  Loading          
+Here's the rewritten content in Markdown format:
 
-download backup\_system.sh
+```markdown
+# backup_system.sh
 
-chmod +x backup\_system.sh
+## NAME
 
-mv backup\_system.sh $HOME OR add it to whatever PATH location you like
+backup_system.sh - Backup and restore system packages and configurations
 
-**Usage: backup\_system.sh \[options\]**
-----------------------------------------
+## SYNOPSIS
 
-Options:
+```
+backup_system.sh [options]
+``
 
-\-a, --apt Backup apt packages
+## DESCRIPTION
 
-\-b, --brew Backup homebrew packages
+backup_system.sh is a script to backup and restore installed packages and configuration files on a Debian system.
 
-\-f, --flatpak Backup flatpak packages
+## OPTIONS
 
-\-s, --snap Backup snap packages
+### -a, --aptBackup apt packages
 
-\-g, --gnome Backup GNOME configuration
+### -b, --brewBackup homebrew packages
 
-\-t, --terminal Backup terminal configuration
+### -f, --flatpakBackup flatpak packages
 
-\-n, --nvim Backup nvim configuration
+### -s, --snapBackup snap packages
 
-\-c, --config Backup .config folder
+### -g, --gnomeBackup GNOME configuration
 
-\-A, --all Backup all packages and configurations
+### -t, --terminalBackup terminal configuration
 
-\-r, --restore Restore system based on the .cfg file
+### -n, --nvimBackup nvim configuration
 
-\-h, --help Display this help message
+### -c, --configBackup .config folder
+
+### -A, --allBackup all packages and configurations
+
+### -r, --restore Restore system based on the .cfg file
+
+### -h, --help Display this help message
+
+## EXAMPLES
+
+```
+./backup_system.sh --all
+./backup_system.sh --apt --brew --gnome
+./backup_system.sh --restore
+``
+
+## AUTHOR
+
+Written by [Your Name]
+
+## COPYRIGHT
+
+Copyright (co 2023 [Your Name]. License: MIT
+
+## SEE ALSO
+
+apt(8), brew(1), flatpak(1), snap(1)
+```
+
